@@ -1,252 +1,154 @@
-# 🐟 Frontend - 북태평양 연어 지능형 양식장 대시보드
+# PetMediScan Frontend
 
-React + Vite + TypeScript 기반 실시간 모니터링 웹 대시보드
+반려동물 안구/피부질환 진단 모바일 애플리케이션
 
----
+## 기술 스택
 
-## 📋 **목차**
+- **Framework**: React Native + Expo
+- **Language**: TypeScript
+- **Styling**: TailwindCSS (Nativewind)
+- **State Management**: React Context / Redux (선택)
+- **Navigation**: React Navigation
+- **HTTP Client**: Axios
+- **Platform**: iOS + Android
 
-- [개요](#-개요)
-- [주요 기능](#-주요-기능)
-- [화면 구성](#-화면-구성)
-- [설치 및 실행](#-설치-및-실행)
-- [디렉토리 구조](#-디렉토리-구조)
+## 주요 기능
 
----
+### 1. 사용자 인증
+- 회원가입 / 로그인
+- JWT 토큰 기반 인증
+- 비밀번호 찾기
 
-## 🎯 **개요**
+### 2. 반려동물 관리
+- 반려동물 프로필 등록
+  - 이름, 나이, 종 (강아지/고양이)
+  - 품종, 생년월일
+- 반려동물 목록 조회
+- 프로필 수정/삭제
 
-연어 양식장 관리자를 위한 **실시간 모니터링 대시보드**
+### 3. 진단 기능
+- 카메라 촬영 (안구/피부)
+- 갤러리에서 이미지 선택
+- AI 진단 요청
+- 실시간 진단 결과 표시
+  - 질환명
+  - 신뢰도 (Confidence Score)
+  - 질환 설명
+  - 대처 방법
 
-### **핵심 가치**
-- 📹 **실시간 CCTV 영상** - AI 감지 결과 오버레이
-- 📊 **데이터 시각화** - 성장 추이, 수질 트렌드
-- ⚠️ **즉시 알림** - 수질 이상, 질병 의심 개체
-- 📱 **반응형 디자인** - PC, 태블릿, 모바일 지원
+### 4. 진단 이력
+- 반려동물별 진단 이력 조회
+- 날짜별 필터링
+- 진단 결과 상세 보기
 
----
-
-## ✨ **주요 기능**
-
-### **1. 대시보드 홈**
-```
-┌─────────────────────────────────────┐
-│  🐟 연어 양식장 관리 시스템         │
-├─────────────────────────────────────┤
-│ 📊 전체 현황                        │
-│  - 총 수조 수: 4개                  │
-│  - 총 연어 수: 1,948마리            │
-│  - 평균 성장률: +5.2%               │
-├─────────────────────────────────────┤
-│ 🚨 최근 알림                        │
-│  ⚠️ 1번 수조 - 수온 상승 (19.5°C)  │
-│  🩺 3번 수조 - 질병 의심 개체 발견  │
-└─────────────────────────────────────┘
-```
-
----
-
-### **2. 실시간 모니터링**
-- **CCTV 영상 스트리밍** (WebRTC)
-- **AI 감지 결과 오버레이**
-  - Bounding Box (개체별)
-  - 개체 수 표시
-  - 평균 크기 표시
-- **수질 센서 실시간 그래프**
-  - 수온, 염도, DO, pH
-
----
-
-### **3. 수조 상세 정보**
-```
-[1번 수조 - 치어]
-├─ 현재 개체 수: 487마리
-├─ 평균 체장: 223mm
-├─ 평균 중량: 115g
-├─ 사료 공급 이력
-│  └─ 오늘: 1,340g (09:30, 16:00)
-└─ 수질 상태
-   ├─ 수온: 18.8°C ✅
-   ├─ DO: 7.2 mg/L ✅
-   └─ pH: 7.3 ✅
-```
-
----
-
-### **4. 통계 및 분석**
-- **성장 추이 그래프** (일/주/월)
-- **수질 트렌드 분석**
-- **사료 효율성 분석**
-- **수확 예측 시뮬레이터**
-
----
-
-### **5. 사료 관리**
-- 급이 스케줄 등록
-- 자동 급이량 계산 (AI 추천)
-- 사료 재고 관리
-- 급이 이력 조회
-
----
-
-## 🖥️ **화면 구성**
-
-### **메인 화면 (Dashboard)**
-```
-┌──────────────────────────────────────────────────┐
-│  [로고] 연어 양식장              [알림] [사용자]  │
-├──────────────────────────────────────────────────┤
-│                                                   │
-│  ┌─────────────┐  ┌─────────────┐               │
-│  │ 📊 총 수조   │  │ 🐟 총 연어   │               │
-│  │    4개      │  │  1,948마리  │               │
-│  └─────────────┘  └─────────────┘               │
-│                                                   │
-│  ┌───────────────────────────────────────────┐  │
-│  │ 📹 실시간 CCTV (1번 수조)                 │  │
-│  │                                            │  │
-│  │   [YOLO 감지 결과 오버레이]                │  │
-│  │   개체 수: 487마리                         │  │
-│  │                                            │  │
-│  └───────────────────────────────────────────┘  │
-│                                                   │
-│  ┌───────────────────────────────────────────┐  │
-│  │ 💧 수질 센서 (실시간)                      │  │
-│  │   수온: 18.8°C ━━━━━━━━━━━━━━━━━         │  │
-│  │   DO:   7.2   ━━━━━━━━━━━━━━━━━         │  │
-│  │   pH:   7.3   ━━━━━━━━━━━━━━━━━         │  │
-│  └───────────────────────────────────────────┘  │
-│                                                   │
-└──────────────────────────────────────────────────┘
-```
-
----
-
-## 🚀 **설치 및 실행**
-
-### **1. 사전 요구사항**
-- Node.js 18+
-- npm 또는 yarn
-
-### **2. 의존성 설치**
-```bash
-npm install
-```
-
-### **3. 개발 서버 실행**
-```bash
-npm run dev
-```
-
-**접속**: http://localhost:3000
-
-### **4. 프로덕션 빌드**
-```bash
-npm run build
-```
-
----
-
-## 📁 **디렉토리 구조**
+## 프로젝트 구조
 
 ```
-frontend/
-├── public/
-│   └── logo.png                   # 로고 이미지
+pet-frontend/
 ├── src/
-│   ├── components/
-│   │   ├── Dashboard.tsx          # 대시보드 메인
-│   │   ├── LiveCamera.tsx         # 실시간 CCTV
-│   │   ├── WaterSensor.tsx        # 수질 센서 그래프
-│   │   ├── TankList.tsx           # 수조 목록
-│   │   ├── FeedSchedule.tsx       # 사료 스케줄
-│   │   └── Statistics.tsx         # 통계 그래프
-│   ├── pages/
-│   │   ├── HomePage.tsx           # 홈 페이지
-│   │   ├── TankDetailPage.tsx     # 수조 상세
-│   │   ├── FeedPage.tsx           # 사료 관리
-│   │   └── AnalyticsPage.tsx      # 통계 분석
-│   ├── services/
-│   │   ├── api.ts                 # API 호출 (Axios)
-│   │   └── websocket.ts           # WebSocket 연결
-│   ├── types/
-│   │   ├── fish.ts                # 연어 타입 정의
-│   │   ├── sensor.ts              # 센서 타입 정의
-│   │   └── feed.ts                # 사료 타입 정의
-│   ├── App.tsx                    # 메인 App
-│   └── main.tsx                   # Entry Point
-├── package.json                   # 의존성
-├── vite.config.ts                 # Vite 설정
-├── tailwind.config.js             # TailwindCSS 설정
-├── tsconfig.json                  # TypeScript 설정
-├── Dockerfile                     # Docker 이미지
-└── README.md                      # 본 문서
+│   ├── components/       # 재사용 가능한 컴포넌트
+│   │   ├── common/       # 버튼, 입력, 카드 등
+│   │   └── diagnosis/    # 진단 관련 컴포넌트
+│   ├── screens/          # 화면 컴포넌트
+│   │   ├── auth/         # 로그인, 회원가입
+│   │   ├── pets/         # 반려동물 관리
+│   │   ├── diagnosis/    # 진단 화면
+│   │   └── history/      # 진단 이력
+│   ├── navigation/       # 네비게이션 설정
+│   ├── services/         # API 통신
+│   ├── contexts/         # Context API
+│   ├── utils/            # 유틸리티 함수
+│   └── types/            # TypeScript 타입 정의
+├── assets/               # 이미지, 폰트
+├── App.tsx
+└── package.json
 ```
 
----
+## API 엔드포인트
 
-## 🎨 **기술 스택**
+### Authentication
+- `POST /api/auth/register` - 회원가입
+- `POST /api/auth/login` - 로그인
 
-### **프레임워크 및 라이브러리**
-- **React 18.x** - UI 라이브러리
-- **Vite 6.x** - 빌드 도구 (빠른 HMR)
-- **TypeScript 5.x** - 타입 안전성
-- **TailwindCSS 3.x** - 유틸리티 CSS
-- **React Router 6.x** - 라우팅
-- **Axios** - HTTP 클라이언트
-- **Chart.js** - 데이터 시각화
-- **WebRTC** - 실시간 영상 스트리밍
+### Pets
+- `GET /api/pets` - 반려동물 목록
+- `POST /api/pets` - 반려동물 등록
+- `PUT /api/pets/:id` - 반려동물 수정
+- `DELETE /api/pets/:id` - 반려동물 삭제
 
----
+### Diagnosis
+- `POST /api/diagnosis/eye` - 안구 진단
+- `POST /api/diagnosis/skin` - 피부 진단
+- `GET /api/diagnosis/history/:petId` - 진단 이력
 
-## 🔧 **환경 변수**
+## 개발 환경 설정
 
-`.env` 파일:
-```bash
-VITE_API_BASE_URL=http://localhost:8080/api
-VITE_AI_MODEL_URL=http://localhost:5000
-VITE_WEBSOCKET_URL=ws://localhost:8080/ws
-```
+### 1. 사전 요구사항
+- Node.js 18+
+- npm or yarn
+- Expo CLI
+- Android Studio (Android 개발)
+- Xcode (iOS 개발, macOS만)
 
----
-
-## 🧪 **테스트**
+### 2. 설치
 
 ```bash
-# 단위 테스트
-npm run test
+# 의존성 설치
+npm install
 
-# E2E 테스트
-npm run test:e2e
+# Expo 시작
+npm start
+
+# iOS 실행
+npm run ios
+
+# Android 실행
+npm run android
 ```
 
----
+### 3. 환경 변수
 
-## 🐳 **Docker 실행**
+`.env` 파일 생성:
+```env
+API_BASE_URL=http://localhost:8080/api
+```
 
+## Git Workflow
+
+### Branch 전략
+- `main`: 프로덕션 브랜치
+- `develop`: 개발 브랜치
+- `feature/mobile-기능명`: 기능 개발
+
+### Commit Convention
+```
+feat: 새로운 기능 추가
+fix: 버그 수정
+docs: 문서 수정
+style: 코드 스타일 변경 (포맷팅)
+refactor: 코드 리팩토링
+test: 테스트 코드
+chore: 빌드, 설정 변경
+```
+
+### 예시
 ```bash
-# 이미지 빌드
-docker build -t salmon-frontend:latest .
-
-# 컨테이너 실행
-docker run -d \
-  --name salmon-frontend \
-  -p 3000:80 \
-  salmon-frontend:latest
+git checkout -b feature/mobile-login
+# 작업 후
+git add .
+git commit -m "feat: 로그인 화면 구현"
+git push origin feature/mobile-login
+# GitHub에서 Pull Request 생성
 ```
 
----
+## 팀 구성원
 
-## 📝 **라이선스**
+- Mobile 개발자 1: UI/UX 구현
+- Mobile 개발자 2: API 통합, 상태 관리
 
-MIT License - [LICENSE](../LICENSE) 참조
+## 참고 자료
 
----
-
-## 📞 **문의**
-
-- Issues: [Frontend Issues](https://github.com/KoreanIT125/frontend/issues)
-
----
-
-**🐟 React로 연어 양식장을 시각화합니다!**
+- [React Native 공식 문서](https://reactnative.dev/)
+- [Expo 공식 문서](https://docs.expo.dev/)
+- [TypeScript 공식 문서](https://www.typescriptlang.org/)
+- [Nativewind 문서](https://www.nativewind.dev/)
