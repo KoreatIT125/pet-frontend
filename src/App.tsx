@@ -1,36 +1,40 @@
-import { useState } from 'react';
-import './App.css';
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-function App() {
-  const [count, setCount] = useState(0);
+import { RequireAuth } from './components/auth/RequireAuth'
+import { AppLayout } from './components/layout/AppLayout'
+import { LoginPage } from './pages/LoginPage'
+import { SignupPage } from './pages/SignupPage'
 
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const DiagnosePage = lazy(() => import('./pages/DiagnosePage'))
+const EventsPage = lazy(() => import('./pages/EventsPage'))
+const MyPage = lazy(() => import('./pages/MyPage'))
+
+export default function App() {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          🚨 재난 안전 시스템
-        </h1>
-        <p className="text-gray-600 mb-6">
-          CCTV 기반 실시간 사고 감지 시스템
-        </p>
-        
-        <div className="space-y-4">
-          <button
-            onClick={() => setCount((count) => count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition"
-          >
-            카운트: {count}
-          </button>
-          
-          <div className="text-sm text-gray-500">
-            <p>✅ React + Vite + TypeScript</p>
-            <p>✅ TailwindCSS</p>
-            <p>✅ ESLint + Prettier</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+    <BrowserRouter>
+      <Suspense fallback={<div>로딩중...</div>}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
 
-export default App;
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/diagnose" element={<DiagnosePage />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route
+              path="/me"
+              element={
+                <RequireAuth>
+                  <MyPage />
+                </RequireAuth>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  )
+}
