@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { use, useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AuthLayout } from '../components/auth/AuthLayout'
 import { Button } from '../components/ui/Button'
@@ -14,7 +14,6 @@ const SAMPLE_ACCOUNTS = [
 ] as const
 
 export function LoginPage() {
-  const { login, loginWithGoogle } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const fromPath =
@@ -60,6 +59,14 @@ export function LoginPage() {
     setPassword('pw1234')
     setSubmitError(null)
   }
+
+  const { currentUser, login, loginWithGoogle } = useAuth()
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/', { replace: true })
+    }
+  }, [currentUser, navigate])
+
 
   return (
     <AuthLayout

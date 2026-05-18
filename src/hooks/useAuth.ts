@@ -92,8 +92,10 @@ export function useAuth(): UseAuthResult {
     [],
   )
 
+  // 구글 로그인: 백엔드에서 OAuth2 인증 후 프론트엔드로 토큰 전달
   const loginWithGoogle = useCallback(async (): Promise<PublicUser> => {
-    throw new Error('구글 로그인은 현재 지원되지 않습니다.')
+    window.location.href = 'http://localhost:8080/oauth2/authorization/google'
+    return new Promise(() => {})
   }, [])
 
   return { currentUser, loading, login, loginWithGoogle, signup, logout, updateProfile }

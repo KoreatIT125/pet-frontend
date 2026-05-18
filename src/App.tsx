@@ -10,6 +10,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const DiagnosePage = lazy(() => import('./pages/DiagnosePage'))
 const EventsPage = lazy(() => import('./pages/EventsPage'))
 const MyPage = lazy(() => import('./pages/MyPage'))
+const OAuthCallbackPage = lazy(() => import('./pages/OAuthCallbackPage'))
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
 
           <Route element={<AppLayout />}>
             <Route path="/" element={<DashboardPage />} />
