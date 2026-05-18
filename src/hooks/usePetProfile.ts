@@ -83,10 +83,11 @@ export function usePetProfile(ownerId: string | null): UsePetProfileResult {
     [ownerId],
   )
 
-  const remove = useCallback((id: string) => {
-    // 백엔드 DELETE API 미구현 → 로컬 상태에서만 제거
+  const remove = useCallback( async (id: string) => {
+    if (!ownerId) return
+    await axiosInstance.delete(`/pets/${id}`)
     setPets((prev) => prev.filter((p) => p.id !== id))
-  }, [])
+  }, [ownerId])
 
   return { pets, loading, add, update, remove }
 }
