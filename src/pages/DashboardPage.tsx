@@ -1,30 +1,55 @@
-import type { ReactNode } from 'react'
-import {
-  Activity,
-  AlertTriangle,
-  Clock,
-} from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Activity, AlertTriangle, Clock } from 'lucide-react'
 
-const healthMetrics = [
-  {
-    name: '눈 상태',
-    value: '정상',
-    detail: '눈 깜박임과 안구 건조 검사 정상',
-    tone: 'emerald',
-  },
-  {
-    name: '피부 상태',
-    value: '주의',
-    detail: '피부 발적과 가려움 가능성 감지',
-    tone: 'amber',
-  },
-]
+import axiosInstance from '../api/axiosInstance'
+import { useAuth } from '../hooks/useAuth'
 
-const recentEvents = [
-  { time: '14:22', site: 'AI 분석', type: '결막염 의심', level: '주의' },
-  { time: '13:48', site: 'AI 분석', type: '피부 농포 의심', level: '주의' },
-  { time: '13:21', site: 'AI 분석', type: '정상 모니터링', level: '정상' },
-]
+interface DashboardMetric {
+  name: string
+  value: string
+  detail: string
+  tone: 'emerald' | 'amber'
+}
+
+interface DashboardEvent {
+  time: string
+  site: string
+  type: string
+  level: '정상' | '주의' | '위험'
+}
+
+interface DashboardSummary {
+  todayEventCount: number
+  healthCondition: number
+  healthStatus: string
+  healthMetrics: DashboardMetric[]
+  recentEvents: DashboardEvent[]
+}
+
+const demoSummary: DashboardSummary = {
+  todayEventCount: 18,
+  healthCondition: 98,
+  healthStatus: '정상 운영',
+  healthMetrics: [
+    {
+      name: '눈 상태',
+      value: '정상',
+      detail: '눈 깜박임과 안구 건조 검사 정상',
+      tone: 'emerald',
+    },
+    {
+      name: '피부 상태',
+      value: '주의',
+      detail: '피부 발적과 가려움 가능성 감지',
+      tone: 'amber',
+    },
+  ],
+  recentEvents: [
+    { time: '14:22', site: 'AI 분석', type: '결막염 의심', level: '주의' },
+    { time: '13:48', site: 'AI 분석', type: '피부 농포 의심', level: '주의' },
+    { time: '13:21', site: 'AI 분석', type: '정상 모니터링', level: '정상' },
+  ],
+}
 
 function StatCard({
   title,
@@ -54,10 +79,41 @@ function StatCard({
 }
 
 export default function DashboardPage() {
+  const { currentUser } = useAuth()
+  const [summary, setSummary] = useState<DashboardSummary>(demoSummary)
+
+  useEffect(() => {
+    let mounted = true
+
+    async function loadSummary() {
+      if (!currentUser) {
+        setSummary(demoSummary)
+        return
+      }
+
+      try {
+        const { data } = await axiosInstance.get<DashboardSummary>('/dashboard/summary')
+        if (mounted) setSummary(data)
+      } catch {
+        if (mounted) setSummary(demoSummary)
+      }
+    }
+
+    void loadSummary()
+    return () => {
+      mounted = false
+    }
+  }, [currentUser])
+
   return (
     <main className="min-h-screen bg-app-bg">
       <section className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-        {/* Hero */}
+        {!currentUser && (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white/80 px-4 py-3 text-sm text-slate-600">
+            로그인하지 않아도 데모 대시보드를 볼 수 있습니다. 로그인하면 실제 진단 로그로 바뀝니다.
+          </div>
+        )}
+
         <div className="overflow-hidden rounded-[2rem] bg-primary p-8 text-slate-900 shadow-soft">
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
             <div>
@@ -65,35 +121,30 @@ export default function DashboardPage() {
                 <Activity className="h-4 w-4" />
                 마이 펫 케어 홈
               </div>
-              <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
-                마이 펫 케어 홈
-              </h2>
+              <h2 className="text-3xl font-black tracking-tight sm:text-4xl">마이 펫 케어 홈</h2>
               <p className="mt-3 max-w-2xl text-base leading-7 text-slate-300">
-                AI 감지와 분석으로 반려동물 건강 상태를 빠르게 확인하고,
-                이상 징후를 빠르게 파악하여 케어할 수 있도록 돕습니다.
+                AI 감지와 분석으로 반려동물 건강 상태를 빠르게 확인하고, 이상 징후를 빠르게 파악하여 케어할 수 있도록 돕습니다.
               </p>
             </div>
             <div className="rounded-[2rem] bg-white/10 p-5 ring-1 ring-white/10">
               <p className="text-sm font-semibold text-slate-700">건강 컨디션</p>
               <div className="mt-2 flex items-end gap-2">
-                <span className="text-4xl font-black">98%</span>
-                <span className="pb-1 text-sm text-emerald-300">정상 운영</span>
+                <span className="text-4xl font-black">{summary.healthCondition}%</span>
+                <span className="pb-1 text-sm text-emerald-300">{summary.healthStatus}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* KPI */}
         <div className="grid gap-5">
           <StatCard
             title="오늘 감지 이벤트"
-            value="18건"
+            value={`${summary.todayEventCount}건`}
             description="AI가 감지한 이상 징후"
             icon={<AlertTriangle className="h-6 w-6" />}
           />
         </div>
 
-        {/* Health overview cards */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 rounded-[2rem] bg-white p-6 shadow-extra-soft ring-1 ring-slate-200/60">
             <div className="mb-6">
@@ -101,7 +152,7 @@ export default function DashboardPage() {
               <p className="mt-1 text-sm text-slate-500">눈·피부 상태를 한눈에 확인하세요</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              {healthMetrics.map((metric) => (
+              {summary.healthMetrics.map((metric) => (
                 <div
                   key={metric.name}
                   className="rounded-[2rem] bg-surface p-5 shadow-soft ring-1 ring-slate-200/60"
@@ -131,8 +182,11 @@ export default function DashboardPage() {
             <h3 className="text-xl font-black text-slate-900">최근 건강 이벤트</h3>
             <p className="mt-1 text-sm text-slate-500">실시간 감지 로그</p>
             <div className="mt-5 space-y-4">
-              {recentEvents.map((event) => (
-                <div key={`${event.time}-${event.site}`} className="rounded-[2rem] bg-surface p-4 shadow-soft ring-1 ring-slate-200/60">
+              {summary.recentEvents.map((event) => (
+                <div
+                  key={`${event.time}-${event.site}-${event.type}`}
+                  className="rounded-[2rem] bg-surface p-4 shadow-soft ring-1 ring-slate-200/60"
+                >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
                       <Clock className="h-4 w-4" />
@@ -151,13 +205,12 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   <p className="mt-3 font-bold text-slate-900">{event.type}</p>
-                  <p className="mt-1 text-sm text-slate-500">AI 분석 완료</p>
+                  <p className="mt-1 text-sm text-slate-500">{event.site}</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
       </section>
     </main>
   )

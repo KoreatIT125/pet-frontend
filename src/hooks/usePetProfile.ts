@@ -1,58 +1,92 @@
 import { useCallback, useEffect, useState } from 'react'
-import { loadPets, savePets, uid } from '../lib/authStorage'
-import type { Pet } from '../types/pet'
+import axiosInstance from '../api/axiosInstance'
+import type { Pet, PetSpecies } from '../types/pet'
+
+interface BackendPet {
+  id: number
+  name: string
+  species: 'Dog' | 'Cat'
+  breed: string | null
+  birth_date: string | null
+  memberId: number
+}
+
+function toFrontendPet(p: BackendPet, ownerId: string): Pet {
+  const speciesMap: Record<string, PetSpecies> = { Dog: '강아지', Cat: '고양이' }
+  let birthYear: number | undefined
+  if (p.birth_date) {
+    birthYear = new Date(p.birth_date).getFullYear()
+  }
+  return {
+    id: String(p.id),
+    ownerId,
+    name: p.name,
+    species: speciesMap[p.species] ?? '강아지',
+    breed: p.breed ?? '',
+    birthYear,
+    createdAt: p.birth_date ?? new Date().toISOString(),
+  }
+}
 
 export interface UsePetProfileResult {
   pets: Pet[]
-  add: (input: Omit<Pet, 'id' | 'ownerId' | 'createdAt'>) => void
-  update: (id: string, patch: Partial<Pet>) => void
+  loading: boolean
+  add: (input: Omit<Pet, 'id' | 'ownerId' | 'createdAt'>) => Promise<void>
+  update: (id: string, patch: Partial<Pet>) => Promise<void>
   remove: (id: string) => void
 }
 
-/**
- * 특정 ownerId(=현재 로그인 유저)에 속하는 펫만 노출.
- * 변경 사항은 전체 storage에 머지하여 저장.
- */
 export function usePetProfile(ownerId: string | null): UsePetProfileResult {
-  const [allPets, setAllPets] = useState<Pet[]>(() => loadPets())
+  const [pets, setPets] = useState<Pet[]>([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    savePets(allPets)
-  }, [allPets])
-
-  const pets = ownerId ? allPets.filter((p) => p.ownerId === ownerId) : []
+    if (!ownerId) {
+      setPets([])
+      return
+    }
+    setLoading(true)
+    axiosInstance
+      .get<BackendPet[]>('/pets', { params: { memberId: Number(ownerId) } })
+      .then((res) => setPets(res.data.map((p) => toFrontendPet(p, ownerId))))
+      .catch(() => setPets([]))
+      .finally(() => setLoading(false))
+  }, [ownerId])
 
   const add = useCallback(
-    (input: Omit<Pet, 'id' | 'ownerId' | 'createdAt'>) => {
+    async (input: Omit<Pet, 'id' | 'ownerId' | 'createdAt'>) => {
       if (!ownerId) return
-      const newPet: Pet = {
-        ...input,
-        id: uid('pet'),
-        ownerId,
-        createdAt: new Date().toISOString(),
-      }
-      setAllPets((prev) => [...prev, newPet])
+      const speciesMap: Record<string, string> = { 강아지: 'Dog', 고양이: 'Cat' }
+      const birthDate = input.birthYear ? `${input.birthYear}-01-01T00:00:00` : null
+      const { data } = await axiosInstance.post<BackendPet>('/pets', {
+        name: input.name,
+        species: speciesMap[input.species] ?? 'Dog',
+        memberId: Number(ownerId),
+        breed: input.breed ?? '',
+        birth_date: birthDate,
+      })
+      setPets((prev) => [...prev, toFrontendPet(data, ownerId)])
     },
     [ownerId],
   )
 
   const update = useCallback(
-    (id: string, patch: Partial<Pet>) => {
+    async (id: string, patch: Partial<Pet>) => {
       if (!ownerId) return
-      setAllPets((prev) =>
-        prev.map((p) => (p.id === id && p.ownerId === ownerId ? { ...p, ...patch } : p)),
-      )
+      const birthDate = patch.birthYear ? `${patch.birthYear}-01-01T00:00:00` : null
+      const { data } = await axiosInstance.put<BackendPet>(`/pets/${id}`, {
+        breed: patch.breed ?? '',
+        birth_date: birthDate,
+      })
+      setPets((prev) => prev.map((p) => (p.id === id ? toFrontendPet(data, ownerId) : p)))
     },
     [ownerId],
   )
 
-  const remove = useCallback(
-    (id: string) => {
-      if (!ownerId) return
-      setAllPets((prev) => prev.filter((p) => !(p.id === id && p.ownerId === ownerId)))
-    },
-    [ownerId],
-  )
+  const remove = useCallback((id: string) => {
+    // 백엔드 DELETE API 미구현 → 로컬 상태에서만 제거
+    setPets((prev) => prev.filter((p) => p.id !== id))
+  }, [])
 
-  return { pets, add, update, remove }
+  return { pets, loading, add, update, remove }
 }

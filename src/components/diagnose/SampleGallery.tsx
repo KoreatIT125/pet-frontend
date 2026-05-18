@@ -7,8 +7,8 @@ interface Sample {
 }
 
 const SAMPLES: Sample[] = [
-  { src: '/samples/eye_placeholder.png', label: '안구 샘플', region: 'eye' },
-  { src: '/samples/skin_placeholder.png', label: '피부 샘플', region: 'skin' },
+  { src: '/samples/eye_placeholder.svg', label: '안구 샘플', region: 'eye' },
+  { src: '/samples/skin_placeholder.svg', label: '피부 샘플', region: 'skin' },
 ]
 
 export function SampleGallery({

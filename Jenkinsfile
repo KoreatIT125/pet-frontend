@@ -13,7 +13,7 @@ pipeline {
             steps {
                 echo '📦 Node.js 설치 중...'
                 sh '''
-                    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+                    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
                     apt-get install -y nodejs
                     node --version
                     npm --version
@@ -39,6 +39,36 @@ pipeline {
             steps {
                 echo '🔨 프로젝트 빌드 중...'
                 sh 'npm run build || echo Build skipped for React Native'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                echo '🐳 프론트 Docker 이미지 빌드 중...'
+                sh '''
+                    docker build \
+                        --build-arg VITE_API_URL=/api \
+                        --build-arg VITE_API_BASE_URL=/api \
+                        -t petmediscan-frontend:${BUILD_NUMBER} .
+                    docker tag petmediscan-frontend:${BUILD_NUMBER} petmediscan-frontend:latest
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo '🚀 프론트 Docker 컨테이너 재배포 중...'
+                sh '''
+                    docker stop petmediscan-frontend || true
+                    docker rm petmediscan-frontend || true
+
+                    docker run -d \
+                        --name petmediscan-frontend \
+                        --network petmediscan-infra_petmediscan-network \
+                        -p 3000:80 \
+                        --restart unless-stopped \
+                        petmediscan-frontend:latest
+                '''
             }
         }
         

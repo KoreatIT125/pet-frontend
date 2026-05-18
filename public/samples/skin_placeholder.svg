@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480" viewBox="0 0 800 480" fill="none">
+  <defs>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fee2e2"/>
+      <stop offset="100%" stop-color="#fca5a5"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="480" rx="36" fill="url(#g2)"/>
+  <path d="M240 290c30-95 150-120 220-60 45 38 65 92 50 138H280c-38 0-66-40-40-78Z" fill="#fff7ed" fill-opacity="0.95"/>
+  <circle cx="355" cy="250" r="24" fill="#fb7185"/>
+  <circle cx="430" cy="285" r="18" fill="#fb7185"/>
+  <circle cx="485" cy="230" r="12" fill="#fb7185"/>
+  <text x="50%" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" fill="#7f1d1d">Skin Sample</text>
+</svg>
